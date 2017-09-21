@@ -56,7 +56,8 @@ def extract_submissions(driver, links):
         for ele in soup.find_all('code'):
             submissions.append((name, ele.text))
             break
-
+    
+    driver.close()
     return submissions
 
 def to_file(assignment, submissions):
