@@ -24,7 +24,8 @@ def to_assignment(driver, assignment, section):
     for ele in driver.find_elements_by_class_name('collapsible-header'):
         ele.click()
 
-    driver.find_element_by_partial_link_text('Grade section ' + section).click()
+    driver.find_element_by_partial_link_text('Grade all').click()
+    driver.find_element_by_xpath('//label[input]').send_keys(section)
 
     return driver
 
@@ -51,11 +52,11 @@ def extract_submissions(driver, links):
         driver.get(base + link)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         name = soup.find('h2').contents[-1].strip().strip('(').strip(')')
-        
+
         for ele in soup.find_all('code'):
             submissions.append((name, ele.text))
             break
-    
+
     driver.close()
     return submissions
 
@@ -100,4 +101,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
