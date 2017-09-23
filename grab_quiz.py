@@ -1,11 +1,7 @@
 from bs4 import BeautifulSoup
 import sys
 from selenium import webdriver
-import json
 import time
-import re
-import pprint
-import json
 
 def login(user, password):
 
