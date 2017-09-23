@@ -2,6 +2,10 @@ from bs4 import BeautifulSoup
 import sys
 from selenium import webdriver
 import json
+import time
+import re
+import pprint
+import json
 
 def login(user, password):
 
@@ -18,50 +22,75 @@ def login(user, password):
 
     return driver
 
-def to_assignment(driver, assignment, section):
+def to_assignment(driver, assignment):
 
     driver.find_element_by_partial_link_text(assignment).click()
     for ele in driver.find_elements_by_class_name('collapsible-header'):
         ele.click()
 
-    driver.find_element_by_partial_link_text('Grade section ' + section).click()
+    driver.find_element_by_partial_link_text('Grade all submissions').click()
+    time.sleep(7)
 
     return driver
 
 
-def get_quizzes(driver):
+def get_quizzes(driver, section):
+    
+    last_height = driver.execute_script('return document.body.scrollHeight')
+    while True:
+        driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+        time.sleep(1)
+        new_height =  driver.execute_script('return document.body.scrollHeight')
+        if new_height == last_height:
+            break
+        last_height = new_height
 
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
+    
+
+    correct_rows = []
+    table = soup.findChildren('table')[0]
+    rows = table.findChildren('tr')
+    for row in rows:
+        cells = row.findChildren('td', {'class': 'sec'})
+        for cell in cells:
+            if cell.text == section:
+                correct_rows.append(row)
 
     to_traverse = []
-    for ele in soup.find_all('a', href=True):
-        if ele['href'].endswith('/view'):
-            to_traverse.append(ele['href'])
-
+    for row in correct_rows:
+        data = row.findChildren('td', {'class' : 'id sorting_1'})[0]
+        name = ''
+        link = ''
+        for ele in data.find_all('a', href=False):
+            name = ele.text
+        for ele in data.find_all('a', href=True):
+            link = ele['href']
+        to_traverse.append((name,link))
+       
     print('You have {0} Submissions to grade'.format(len(to_traverse)))
     return (driver, to_traverse)
 
-def extract_submissions(driver, links):
+def extract_submissions(driver, tups):
 
     base = 'https://autograder.cse.buffalo.edu'
     soup = None
     submissions = []
-    for link in links:
-        driver.get(base + link)
+    for tup in tups:
+        driver.get(base + tup[1])
         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        name = soup.find('h2').contents[-1].strip().strip('(').strip(')')
         
         for ele in soup.find_all('code'):
-            submissions.append((name, ele.text))
+            submissions.append((tup[0], ele.text))
             break
     
     driver.close()
     return submissions
 
-def to_file(assignment, submissions):
+def to_file(assignment, section, submissions):
 
-    fout = open(assignment + '.txt', 'w')
+    fout = open(assignment + '-' + section + '.txt', 'w')
 
     for sub in submissions:
         fout.write(sub[0] + '\n')
@@ -87,14 +116,14 @@ def main():
     section = sys.argv[4]
 
     driver = login(user, password)
-    driver = to_assignment(driver, assignment, section)
-    res_tup = get_quizzes(driver)
+    driver = to_assignment(driver, assignment)
+    res_tup = get_quizzes(driver, section)
 
     submissions = extract_submissions(res_tup[0], res_tup[1])
 
-    to_file(assignment, submissions)
+    to_file(assignment, section, submissions)
 
-    print('Submissions are in file {0}.txt'.format(assignment))
+    print('Submissions are in file {0}-{1}.txt'.format(assignment, section))
     exit()
 
 
