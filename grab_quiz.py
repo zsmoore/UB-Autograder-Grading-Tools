@@ -60,9 +60,9 @@ def extract_submissions(driver, links):
     driver.close()
     return submissions
 
-def to_file(assignment, submissions):
+def to_file(assignment, submissions, section):
 
-    fout = open(assignment + '.txt', 'w')
+    fout = open(assignment + '-' + section + '.txt', 'w')
 
     for sub in submissions:
         fout.write(sub[0] + '\n')
@@ -93,7 +93,7 @@ def main():
 
     submissions = extract_submissions(res_tup[0], res_tup[1])
 
-    to_file(assignment, submissions)
+    to_file(assignment, submissions, section)
 
     print('Submissions are in file {0}.txt'.format(assignment))
     exit()
