@@ -95,7 +95,7 @@ def main():
 
     to_file(assignment, submissions, section)
 
-    print('Submissions are in file {0}.txt'.format(assignment))
+    print('Submissions are in file {0}-{1}.txt'.format(assignment,section))
     exit()
 
 
