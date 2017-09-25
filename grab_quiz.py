@@ -18,7 +18,7 @@ def login(user, password):
 
     return driver
 
-def to_assignment(driver, assignment, section):
+def to_assignment(driver, assignment):
 
     driver.find_element_by_partial_link_text(assignment).click()
     for ele in driver.find_elements_by_class_name('collapsible-header'):
@@ -67,10 +67,16 @@ def to_file(assignment, submissions, section):
         fout.write(sub[0] + '\n')
 
         data = eval(sub[1])
-        fout.write('Question 1:\t' + data['question-1'] + '\n')
-        fout.write('Question 2:\t' + data['question-2'] + '\n')
-        fout.write('Question 3:\t' + data['question-3'] + '\n')
-        fout.write('Question 4"\t' + data['question-4'] + '\n')
+        if 'question-1' in data:
+            fout.write('Question 1:\t' + data['question-1'] + '\n')
+        if 'question-2' in data:
+            fout.write('Question 2:\t' + data['question-2'] + '\n')
+        if 'question-3' in data:
+            fout.write('Question 3:\t' + data['question-3'] + '\n')
+        if 'question-4' in data:
+            fout.write('Question 4:"\t' + data['question-4'] + '\n')
+        if 'question-5' in data:
+            fout.write('Question 5:"\t' + data['question-5'] + '\n')
         fout.write('\n\n\n')
 
     fout.close()
