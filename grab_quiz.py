@@ -18,7 +18,7 @@ def login(user, password):
 
     return driver
 
-def to_assignment(driver, assignment):
+def to_assignment(driver, assignment, section):
 
     driver.find_element_by_partial_link_text(assignment).click()
     for ele in driver.find_elements_by_class_name('collapsible-header'):
